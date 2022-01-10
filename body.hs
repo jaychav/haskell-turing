@@ -164,7 +164,7 @@ testTape2 = (
 testTape3 :: Tape
 testTape3 = (
       [One, Zero, Zero, Zero, One, Zero, One, Zero, One, Blank, Blank, Blank],
-       One,
+       Blank,
       [Blank, Blank, Blank])
 
 --------------------------- End example TMs ---------------------------
@@ -176,13 +176,12 @@ getInstructionList transitions state = findWithDefault [] state transitions
 
 -- getInstruction gets the particular Instruction for the current Symbol at the Tape head
 getInstruction :: TransitionLookup -> State -> Tape -> Instruction
-getInstruction transitions state (_, symbol, _) =
-            if symbol == Zero
-            then head instructions
-            else if symbol == One
-            then instructions!!1
-            else instructions!!2
-      where instructions = getInstructionList transitions state
+getInstruction transitions state (_, symbol, _)
+  | symbol == Zero = head instructions
+  | symbol == One = instructions !! 1
+  | otherwise = instructions !! 2
+  where
+      instructions = getInstructionList transitions state
 
 -- getNextState is a helper function for getting the State we want to transition to next
       -- for a particular Tape head Symbol in our current State,
@@ -219,7 +218,7 @@ simulationTM :: TransitionLookup -> Tape -> State -> Tape
 simulationTM transitions tape state =
       if state == Halt
       then tape
-      else (simulationTM transitions newTape newState)
+      else simulationTM transitions newTape newState
             where newTape = oneStep transitions tape state
                   newState = getNextState transitions tape state
 
@@ -231,7 +230,7 @@ transitionLookupToDot :: TransitionLookup -> [String]
 transitionLookupToDot transitions =
       ["digraph D {"] ++ ["init -> 0;"] ++ getDotInstructions transitions keys
             ++ ["Halt -> Halt;"] ++ ["}"]
-            where keys = (getTupleKeys (toList transitions))
+            where keys = getTupleKeys (toList transitions)
 
 
 getDotInstructions :: TransitionLookup ->  [State] -> [String]
